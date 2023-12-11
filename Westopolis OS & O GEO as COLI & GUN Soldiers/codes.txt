@@ -1,0 +1,28 @@
+$Unrestrict Geo/Coli Names v2 [dreamsyntax]
+C21E280C 00000006
+81E100F4 3E008004
+62106720 7C0F8000
+40820014 3DE0801E
+61EF2814 7DE803A6
+4E800020 2C030000
+60000000 00000000
+*Allows for using as many chunks as you want without being constrained to the stage's original properties. Names do not need to match original files with this code on. This makes importing and creating new levels in Shadow much easier.
+*
+*v2 properly routes non-geo/coli unlike v1, so no more crashing on events
+*
+*Geo models must still follow:
+*[NAME]_[MATTYPE]_[CHUNKNUM]
+*
+*Collision models must still follow:
+*[NAME]_COLI_[CHUNKNUM]
+*
+*The 2nd and 3rd params can be swapped
+
+$Moonjump [LimblessVector]
+2856ed4e ffdf0020
+045f2bd8 43a00000
+e2000001 80008000
+2a56ed4e ffdf0020
+045f2bd8 c3a00000
+e2000001 80008000
+*Hold Z to flip gravity.
