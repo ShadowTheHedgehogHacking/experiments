@@ -1,0 +1,162 @@
+11.8.2018
+=== Details ===
+After attempting my fileswap method again for STG0611 to inspect a camera issue,
+I realized what I had done initially was a fluke. I never actually finished renaming the files inside all of the stg0800_XX.one files!
+So, how was this working? This led me to inspect what was actually going on.
+It turns out that what was happening was a simpler way to load a different stage.
+Below is the full breakdown.
+
+Simply:
+-- stgXXXX_dat.one's BDT file is read for the stageID string, where the stgXXXX_XX.one files (chunk geo etc) are loaded from that string. 
+If the string is 'X', then it will load the chunk and geo from the 'X' folder.
+-- stgXXXX_cam.dat, stgXXXX_light.bin are loaded from the original stage folder, and will crash if not present
+
+=== Breakdown === 
+::Files you NEED for a level swap (to not crash)::
+_cam.dat
+_light.bin
+_dat.one -> redirects geo/collision/texture [e.g stg_BDTVAL_01.one, stg_BDTVAL_02.one, ...] based on BDT value
+*You can test the above swap in-game without doing any setid.bin edit*
+
+::Files you WANT for the level swap (need to edit setid.bin)::
+_cmn.dat/_nrm.dat/_hrd.dat -> relies on _gdt.one [and setid.bin] (objects)
+_gdt.one -> relies on setid.bin
+_fx.one (effects, fire etc)
+_ds1.dat (destructibles)
+.fog (minor tint)
+
+Some of the files, such as .fog, are not in every stage.
+
+=== How to redirect a level ===
+Pick the level you are planning to replace. In this example I'll use 2P stage 2, stg0801
+Delete everything in the folder
+Pick the level you want to use as a replacement. In this example I'll use stg0300
+
+Copy the following to stg0801:
+stg0300.fog
+stg0300_cam.dat
+stg0300_cmn.dat
+stg0300_dat.one
+stg0300_ds1.dat
+stg0300_fx.one
+stg0300_gdt.one
+stg0300_hrd.dat
+stg0300_light.bin
+stg0300_nrm.dat
+
+Run the rename_stage powershell script and enter prior stageID and target stageID.
+When prompted, I put:
+0300<ENTER>
+0801<ENTER>
+This will rename all files, replacing every 0300 with 0801.
+
+|| Next you will need Sewer56's HeroesONE-Reloaded tool. If you don't have it, get it here: https://github.com/Sewer56/HeroesONE-Reloaded
+
+Use the tool and open your newly renamed stg0801_dat.one
+For this example stg0300 has this inside the file:
+
+PATH.PTP
+S0300_ZN041.ADB
+STG0300.BDT
+STG0300TN027.ADB
+STG0300TN030.ADB
+
+Right-Click STG0300.BDT and Rename to STG0801.BDT 
+
+Contents become:
+PATH.PTP
+S0300_ZN041.ADB
+STG0801.BDT
+STG0300TN027.ADB
+STG0300TN030.ADB
+
+**
+I haven't thoroughly tested if its necessary to rename the .ADB files.
+It seems to work without renaming them, but if you experience a crash or weird behavior try:
+Contents become:
+PATH.PTP
+S0801_ZN041.ADB
+STG0801.BDT
+STG0801TN027.ADB
+STG0801TN030.ADB
+**
+
+File -> Save (pick the one that has a checkmark next to it)
+And make sure you replace your old file with this newly saved one
+
+||| Next you will need igorsebra4's ShadowSETIDTBLEditor (with CPYmod). Get the prebuilt version with CPYmod here: https://github.com/ShadowTheHedgehogHacking/ShadowSETIDTBLEditor/releases
+
+First make a copy of your setid.bin file incase something goes wrong.
+Run the program, Select "File" and open your setid.bin file (located in the root of the game files)
+We are sourcing (stg0300) and targeting (stg0801).
+We must reference the stage by name.
+You can find an online list of stgIDs here: https://info.sonicretro.org/SCHG:Shadow_the_Hedgehog/Stage_ID_List
+stg0300 = Cryptic Castle
+stg0801 = 2-Player stage 2
+(copied from the onlinelist)
+
+Note that the online list does not match for stg0801 in the program. The program has "2-Player Stage 2" with a capital S.
+Make sure it matches to the program, and not the onlinelist before running CPY button.
+
+Replace the textbox with "source" to read:
+Cryptic Castle
+Replace the textbox with "target" to read:
+2-Player Stage 2
+
+Click CPY
+
+A brief message will show up, either telling you the names are wrong or a message saying
+src:<number>
+tgt:<number>, where number is the position in the list -1
+Click OK
+The operation will execute, then a popup will appear showing all the changed values.
+Click OK
+File -> Save
+
+Lastly, edit nukkoro2.inf and copy over the starting position from the target stage to the new stage.
+For our example, this is our original stage:
+[GUN2P_0801]
+MIPMAPK : -70
+PLAYER : 0 944 850 3116 0 90 0
+PLAYER : 1 -944 850 3116 0 -90 0
+START2P : 106 751 3117
+GOALEVENTPOS_N : 106 751 3117
+MISSIONCOUNT_N : 600 0
+
+This is our target stage:
+[HorrorCastle]
+PLAYER : 0 0 300 0 0 0 0
+GOALEVENTPOS_N : -14190 -5270 -20752
+GOALEVENTPOS_H : -3420 -1844 -21000
+GOALEVENTPOS_D : -4500 -1912 -9270
+GOALEVENTPOS_X : -14190 -5270 -20752
+RANK_H : 18000 16000 12000 8000
+RANK_N : 18000 16000 12000 8000
+RANK_D : 14000 12000 8000 5000
+MISSIONCOUNT_D : 5 0
+MISSIONCOUNT_H : 2 0
+
+
+So we edit [GUN2P_0801] to be:
+MIPMAPK : -70
+PLAYER : 0 0 300 0 0 0 0
+PLAYER : 1 0 300 20 0 0 0
+START2P : -14190 -5270 -20752
+GOALEVENTPOS_N : -14190 -5270 -20752
+MISSIONCOUNT_N : 600 0
+
+You are now done! Go try launching the stage you replaced!
+
+For debugging, try repeating the steps after ||| but with CPY Only True enabled if the level crashes on load.
+Make sure you close the program each time, CPY is not intended to be used multiple times in a row. 
+Make sure you start with an original setid.bin file!
+
+For our example:
+Are we done? No! On launching the 2P Stage 2, the "loading" message is endlessly cycling.
+How do we debug what went wrong? Let's delete the setid.bin and replace it with our backup and try the steps after ||| again, but this time with CPY Only True enabled.
+After attempting this again, it still endlessly loads.
+What do we do now? Move everything in our folder somewhere else except the core required files: _cam.dat, _dat.one, _light.bin files
+-> This causes the came to halt at the loading screen. So what went wrong?
+   What went wrong is for some unknown reason 2P Stage 2 and 2P Stage 3 have an issue with this method. 
+I verified by copying our files above but instead over stg0800 (renamed them) and changed the STG0801.BDT to be STG0800.BDT within the .dat. This worked.
+Then I went and used the SETIDBIN editor again but targeting 2-Player Stage 1 this time. Also changed GUN2P_0800 to be the values we put over 0801.
