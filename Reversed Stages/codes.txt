@@ -1,0 +1,7 @@
+Required Gecko code:
+
+```
+$Reverse Chaos Control [dreamsyntax]
+045EE3A4 C4610000
+*Makes Chaos Control travel splines backwards
+```
